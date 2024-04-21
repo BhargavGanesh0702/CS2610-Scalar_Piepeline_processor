@@ -1,12 +1,12 @@
 # CS2610_Pipeline_Processor
 ## Directory structure
 ```
-CS22B087-CS22B028/
-├── input/
+CS22B087-CS22B028_LAB8
+├── input
 │   ├── ICache.txt
 │   ├── DCache.txt
 │   └── RF.txt
-├── output/
+├── output
 │   ├── DCache.txt
 │   ├── Output.txt
 │   └── RF.txt
@@ -14,6 +14,8 @@ CS22B087-CS22B028/
 └── README.md
 ```
 ## Commands to run the code
+We are also creating a RF.txt file in output folder which show contents of register after execution.
+
 We used long options to run the code.
 | Options | Arguments | 
 | -------- | -------- |
@@ -23,7 +25,9 @@ We used long options to run the code.
 ### Example Usage
 To compile use `g++ main.cpp`.
 
-To Run use `./a.out --in input --out output`.
+To Run use `./a.out --in input --out output`. 
+
+Make sure to use correct folder names in run command.
 
 Before running the code make sure to create folders 'input' and 'output'.
 
