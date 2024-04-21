@@ -1,6 +1,12 @@
-
-//  Created by vibhav kanakamedala and Bhargav Ganesh on 08/04/24.
+//
+//  pipeline.cpp
+//  Coding
+//
+//  Created by vibhav kanakamedala and Bhargav Ganesh on 12/04/24.
+//
 #include <bits/stdc++.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <getopt.h>
 using namespace std;
 
@@ -26,7 +32,7 @@ int twoscomplement(int n)
 {
     // array to store binary number
     vector<int> binaryNum(4);
-    int k =n;
+    int k = n;
     // counter for binary array
     int i = 0;
     while (n > 0) {
@@ -44,10 +50,13 @@ int twoscomplement(int n)
 
 
 
+
+
 class Instruction {
 private:
     int IR[4],IPC;
     int rs1,rs2,Imm,ALUOuptut;
+    int8_t Imm8;
     
     int LMD,is_stalled=0;
     
@@ -92,7 +101,7 @@ public:
                 reg[IR[1]] = false;
                 break;
             case 7: //NOT instruction
-                if(is_ready(rs1, IR[1])) return;
+                if(is_ready(rs1, IR[2])) return;
                 reg[IR[1]] = false;
                 break;
             case 8: //SLLI instruction
@@ -107,7 +116,7 @@ public:
                 reg[IR[1]] = false;
                 break;
             case 10: //LI instruction
-                Imm  = static_cast<int8_t>((IR[2]<<4)+(IR[3]));
+                Imm  = (IR[2]<<4)+(IR[3]);
                 reg[IR[1]] = false;
                 break;
             case 12: //ST instruction
@@ -116,12 +125,12 @@ public:
                 Imm = twoscomplement(IR[3]);
                 break;
             case 13: //JMP instruction
-                Imm = static_cast<int8_t>((IR[1]<<4)+(IR[2]));
+                Imm = (IR[1]<<4)+(IR[2]);
                 can_fetch=0;
                 break;
             case 14: //BEQZ instruction
                 if(is_ready(rs1, IR[1])) return;
-                Imm = static_cast<int8_t>((IR[2]<<4) + IR[3]);
+                Imm = (IR[2]<<4) + IR[3];
                 can_fetch=0;
                 break;
             case 15: //HLT instruction
@@ -133,68 +142,72 @@ public:
     
     void execute(){
         switch (IR[0]) {
-            case 0:
+            case 0://ADD
                 ALUOuptut = rs1 + rs2;
                 reg[IR[1]] = 0;
                 break;
-            case 1:
+            case 1://SUB
                 ALUOuptut = rs1 - rs2;
                 reg[IR[1]] = 0;
                 break;
-            case 2:
+            case 2://MUL
                 ALUOuptut = rs1*rs2;
                 reg[IR[1]] = 0;
                 break;
-            case 3:
+            case 3://INC
                 ALUOuptut = rs1 + 1;
                 reg[IR[1]] = 0;
                 break;
-            case 4:
+            case 4://AND
                 ALUOuptut = rs1 & rs2;
                 reg[IR[1]] = 0;
                 break;
-            case 5:
+            case 5://OR
                 ALUOuptut = rs1 | rs2;
                 reg[IR[1]] = 0;
                 break;
-            case 6:
+            case 6://XOR
                 ALUOuptut = rs1^rs2;
                 reg[IR[1]] = 0;
                 break;
-            case 7:
-                ALUOuptut = ~rs1;
+            case 7://NOT
+                
+                ALUOuptut = -1*(rs1+1);
+              
                 reg[IR[1]] = 0;
                 break;
-            case 8:
+            case 8://SLLI
                 ALUOuptut = rs1 << Imm;
                 reg[IR[1]] = 0;
                 break;
-            case 9:
+            case 9://SRLI
                 ALUOuptut = rs1 >> Imm;
                 reg[IR[1]] = 0;
                 break;
-            case 10:
+            case 10://LI
                 ALUOuptut = Imm;
                 reg[IR[1]] = 0;
                 break;
-            case 11:
+            case 11://LD
                 ALUOuptut = rs1 + Imm;
                 reg[IR[1]] = 0;
                 break;
-            case 12:
+            case 12://ST
                 ALUOuptut =rs1 + Imm;
                 break;
-            case 13:
-                ALUOuptut = IPC + Imm*2;
+            case 13://JMP
+                Imm8 = Imm;
+                ALUOuptut = IPC + Imm8*2;
                 PC = ALUOuptut;
 //                can_fetch = 1;
                 break;
-            case 14:
-                ALUOuptut = IPC + Imm*2;
+            case 14://BEQZ
+                Imm8 = Imm;
+                ALUOuptut = IPC + Imm8*2;
                 if(!rs1) PC = ALUOuptut;
 //                can_fetch = 1;
                 break;
-            case 15:
+            case 15://HLT
                 break;
         }
         stage++;
@@ -353,6 +366,14 @@ int main(int argc,char* argv[]){
     }
 
 
+
+
+
+
+
+
+
+
     string inpICache = infolder + "/ICache.txt";
     string inpDCache = infolder + "/DCache.txt";
     string inpRF = infolder + "/RF.txt";
@@ -362,6 +383,15 @@ int main(int argc,char* argv[]){
 
 
 
+
+
+
+
+
+
+
+
+    
     queue<Instruction> INS;
     read_from_file(ICache, 256, inpICache);
     read_from_file2(DCache, 256,inpDCache);
@@ -400,19 +430,19 @@ int main(int argc,char* argv[]){
     
     ofstream output;
     output.open(outOutput);
-    output << "Total number of instructions executed    : " << num_inst << endl;
-    output << "Number of instructions in each class" << endl;
-    output << "Arithmetic instructions                  : " << num_arith << endl;
-    output << "Logical instructions                     : " << num_log << endl;
-    output << "Shift instructions                       : " << num_shift << endl;
-    output << "Memory instructions                      : " << num_store << endl;
-    output << "Load immediate instructions              : " << num_load << endl;
-    output << "Control instructions                     : " << num_con << endl;
-    output << "Halt instructions                        : " << num_halt << endl;
-    output << "Cycles Per Instruction                   : " << (double)num_cycles / num_inst << endl;
-    output << "Total number of stalls                   : " << num_stall << endl;
-    output << "Data stalls (RAW)                        : " << num_dat_st << endl;
-    output << "Control stalls                           : " << num_con_st << endl;
+    output << "Total number of instructions executed        : " << num_inst << endl;
+    output << "Number of instructions in each class     " << endl;
+    output << "Arithmetic instructions                      : " << num_arith << endl;
+    output << "Logical instructions                         : " << num_log << endl;
+    output << "Shift instructions                           : " << num_shift << endl;
+    output << "Memory instructions                          : " << num_store << endl;
+    output << "Load immediate instructions                  : " << num_load << endl;
+    output << "Control instructions                         : " << num_con << endl;
+    output << "Halt instructions                            : " << num_halt << endl;
+    output << "Cycles Per Instruction                       : " << (double)num_cycles / num_inst << endl;
+    output << "Total number of stalls                       : " << num_stall << endl;
+    output << "Data stalls (RAW)                            : " << num_dat_st << endl;
+    output << "Control stalls                               : " << num_con_st << endl;
     output.close();
     
     output.open(outDcache);
@@ -425,3 +455,4 @@ int main(int argc,char* argv[]){
         print(RF[i],output);
     }
 }
+
